@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["get_planet_info_vector"],"struct":["PlanetInfo"]};

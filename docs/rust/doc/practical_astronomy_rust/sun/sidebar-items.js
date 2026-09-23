@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["approximate_position_of_sun","equation_of_time","morning_and_evening_twilight","precise_position_of_sun","solar_elongation","sun_distance_and_angular_size","sunrise_and_sunset"]};

@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["approximate_position_of_planet","precise_position_of_planet","visual_aspects_of_a_planet"]};

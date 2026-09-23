@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["get_binary_info_vector"],"struct":["BinaryInfo"]};

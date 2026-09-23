@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"fn":["approximate_position_of_moon","moon_dist_ang_diam_hor_parallax","moon_phase","moonrise_and_moonset","precise_position_of_moon","times_of_new_moon_and_full_moon"]};
