@@ -33,7 +33,7 @@ pub fn approximate_position_of_planet(
     local_date_year: u32,
     planet_name: String,
 ) -> (f64, f64, f64, f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let (planet_info, _planet_info_status) = pa_pd::get_planet_info_vector(planet_name);
 
@@ -126,16 +126,12 @@ pub fn approximate_position_of_planet(
     let le_ld_rad = (le_deg2 - ld_deg).to_radians();
     let atan2_type_1 = (rd_au * le_ld_rad.sin()).atan2(r_au2 - rd_au * le_ld_rad.cos());
     let atan2_type_2 = (r_au2 * (-le_ld_rad).sin()).atan2(rd_au - r_au2 * le_ld_rad.cos());
-    let a_rad = if rd_au < 1.0 {
-        atan2_type_1
-    } else {
-        atan2_type_2
-    };
-    let lamda_deg1 = if rd_au < 1.0 {
-        180.0 + le_deg2 + pa_m::degrees(a_rad)
-    } else {
-        pa_m::degrees(a_rad) + ld_deg
-    };
+    let a_rad = pa_u::ternary_assign(rd_au < 1.0, atan2_type_1, atan2_type_2);
+    let lamda_deg1 = pa_u::ternary_assign(
+        rd_au < 1.0,
+        180.0 + le_deg2 + pa_m::degrees(a_rad),
+        pa_m::degrees(a_rad) + ld_deg,
+    );
     let lamda_deg2 = lamda_deg1 - 360.0 * (lamda_deg1 / 360.0).floor();
     let beta_deg = pa_m::degrees(
         (rd_au * psi_rad.tan() * ((lamda_deg2 - ld_deg).to_radians()).sin()
@@ -213,7 +209,7 @@ pub fn precise_position_of_planet(
     local_date_year: u32,
     planet_name: String,
 ) -> (f64, f64, f64, f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let _gdate_day = pa_m::lct_gday(
         lct_hour,
@@ -339,7 +335,7 @@ pub fn visual_aspects_of_a_planet(
     local_date_year: u32,
     planet_name: String,
 ) -> (f64, f64, f64, f64, f64, f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let greenwich_date_day = pa_m::lct_gday(
         lct_hour,

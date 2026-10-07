@@ -22,7 +22,7 @@ pub fn lunar_eclipse_occurrence(
     is_daylight_saving: bool,
     zone_correction_hours: i32,
 ) -> (String, f64, u32, u32) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let julian_date_of_full_moon = pa_m::full_moon(
         daylight_saving,
@@ -146,7 +146,7 @@ pub fn lunar_eclipse_circumstances(
     f64,
     f64,
 ) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let julian_date_of_full_moon = pa_m::full_moon(
         daylight_saving,
@@ -267,81 +267,81 @@ pub fn lunar_eclipse_circumstances(
     let lunar_eclipse_certain_date_day = local_civil_date_day;
     let lunar_eclipse_certain_date_month = local_civil_date_month;
     let lunar_eclipse_certain_date_year = local_civil_date_year;
-    let ut_start_pen_phase_hour = if ut_first_contact == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_hour(ut_first_contact + 0.008333) as f64
-    };
-    let ut_start_pen_phase_minutes = if ut_first_contact == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_min(ut_first_contact + 0.008333) as f64
-    };
-    let ut_start_umbral_phase_hour = if ut_start_umbral_phase == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_hour(ut_start_umbral_phase + 0.008333) as f64
-    };
-    let ut_start_umbral_phase_minutes = if ut_start_umbral_phase == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_min(ut_start_umbral_phase + 0.008333) as f64
-    };
-    let ut_start_total_phase_hour = if ut_start_total_phase == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_hour(ut_start_total_phase + 0.008333) as f64
-    };
-    let ut_start_total_phase_minutes = if ut_start_total_phase == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_min(ut_start_total_phase + 0.008333) as f64
-    };
-    let ut_mid_eclipse_hour = if ut_max_eclipse == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_hour(ut_max_eclipse + 0.008333) as f64
-    };
-    let ut_mid_eclipse_minutes = if ut_max_eclipse == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_min(ut_max_eclipse + 0.008333) as f64
-    };
-    let ut_end_total_phase_hour = if ut_end_total_phase == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_hour(ut_end_total_phase + 0.008333) as f64
-    };
-    let ut_end_total_phase_minutes = if ut_end_total_phase == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_min(ut_end_total_phase + 0.008333) as f64
-    };
-    let ut_end_umbral_phase_hour = if ut_end_umbral_phase == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_hour(ut_end_umbral_phase + 0.008333) as f64
-    };
-    let ut_end_umbral_phase_minutes = if ut_end_umbral_phase == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_min(ut_end_umbral_phase + 0.008333) as f64
-    };
-    let ut_end_pen_phase_hour = if ut_last_contact == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_hour(ut_last_contact + 0.008333) as f64
-    };
-    let ut_end_pen_phase_minutes = if ut_last_contact == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_min(ut_last_contact + 0.008333) as f64
-    };
-    let eclipse_magnitude = if eclipse_magnitude1 == -99.0 {
-        -99.0
-    } else {
-        pa_u::round_f64(eclipse_magnitude1, 2)
-    };
+    let ut_start_pen_phase_hour = pa_u::ternary_assign(
+        ut_first_contact == -99.0,
+        -99.0,
+        pa_m::dh_hour(ut_first_contact + 0.008333) as f64,
+    );
+    let ut_start_pen_phase_minutes = pa_u::ternary_assign(
+        ut_first_contact == -99.0,
+        -99.0,
+        pa_m::dh_min(ut_first_contact + 0.008333) as f64,
+    );
+    let ut_start_umbral_phase_hour = pa_u::ternary_assign(
+        ut_start_umbral_phase == -99.0,
+        -99.0,
+        pa_m::dh_hour(ut_start_umbral_phase + 0.008333) as f64,
+    );
+    let ut_start_umbral_phase_minutes = pa_u::ternary_assign(
+        ut_start_umbral_phase == -99.0,
+        -99.0,
+        pa_m::dh_min(ut_start_umbral_phase + 0.008333) as f64,
+    );
+    let ut_start_total_phase_hour = pa_u::ternary_assign(
+        ut_start_total_phase == -99.0,
+        -99.0,
+        pa_m::dh_hour(ut_start_total_phase + 0.008333) as f64,
+    );
+    let ut_start_total_phase_minutes = pa_u::ternary_assign(
+        ut_start_total_phase == -99.0,
+        -99.0,
+        pa_m::dh_min(ut_start_total_phase + 0.008333) as f64,
+    );
+    let ut_mid_eclipse_hour = pa_u::ternary_assign(
+        ut_max_eclipse == -99.0,
+        -99.0,
+        pa_m::dh_hour(ut_max_eclipse + 0.008333) as f64,
+    );
+    let ut_mid_eclipse_minutes = pa_u::ternary_assign(
+        ut_max_eclipse == -99.0,
+        -99.0,
+        pa_m::dh_min(ut_max_eclipse + 0.008333) as f64,
+    );
+    let ut_end_total_phase_hour = pa_u::ternary_assign(
+        ut_end_total_phase == -99.0,
+        -99.0,
+        pa_m::dh_hour(ut_end_total_phase + 0.008333) as f64,
+    );
+    let ut_end_total_phase_minutes = pa_u::ternary_assign(
+        ut_end_total_phase == -99.0,
+        -99.0,
+        pa_m::dh_min(ut_end_total_phase + 0.008333) as f64,
+    );
+    let ut_end_umbral_phase_hour = pa_u::ternary_assign(
+        ut_end_umbral_phase == -99.0,
+        -99.0,
+        pa_m::dh_hour(ut_end_umbral_phase + 0.008333) as f64,
+    );
+    let ut_end_umbral_phase_minutes = pa_u::ternary_assign(
+        ut_end_umbral_phase == -99.0,
+        -99.0,
+        pa_m::dh_min(ut_end_umbral_phase + 0.008333) as f64,
+    );
+    let ut_end_pen_phase_hour = pa_u::ternary_assign(
+        ut_last_contact == -99.0,
+        -99.0,
+        pa_m::dh_hour(ut_last_contact + 0.008333) as f64,
+    );
+    let ut_end_pen_phase_minutes = pa_u::ternary_assign(
+        ut_last_contact == -99.0,
+        -99.0,
+        pa_m::dh_min(ut_last_contact + 0.008333) as f64,
+    );
+    let eclipse_magnitude = pa_u::ternary_assign(
+        eclipse_magnitude1 == -99.0,
+        -99.0,
+        pa_u::round_f64(eclipse_magnitude1, 2),
+    );
 
     return (
         lunar_eclipse_certain_date_day,
@@ -386,7 +386,7 @@ pub fn solar_eclipse_occurrence(
     is_daylight_saving: bool,
     zone_correction_hours: i32,
 ) -> (String, f64, u32, u32) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let julian_date_of_new_moon = pa_m::new_moon(
         daylight_saving,
@@ -487,7 +487,7 @@ pub fn solar_eclipse_circumstances(
     geog_longitude_deg: f64,
     geog_latitude_deg: f64,
 ) -> (f64, u32, u32, f64, f64, f64, f64, f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let julian_date_of_new_moon = pa_m::new_moon(
         daylight_saving,
@@ -588,41 +588,38 @@ pub fn solar_eclipse_circumstances(
     let solar_eclipse_certain_date_day = local_civil_date_day;
     let solar_eclipse_certain_date_month = local_civil_date_month;
     let solar_eclipse_certain_date_year = local_civil_date_year;
-    let ut_first_contact_hour = if ut_first_contact == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_hour(ut_first_contact + 0.008333) as f64
-    };
-    let ut_first_contact_minutes = if ut_first_contact == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_min(ut_first_contact + 0.008333) as f64
-    };
-    let ut_mid_eclipse_hour = if ut_max_eclipse == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_hour(ut_max_eclipse + 0.008333) as f64
-    };
-    let ut_mid_eclipse_minutes = if ut_max_eclipse == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_min(ut_max_eclipse + 0.008333) as f64
-    };
-    let ut_last_contact_hour = if ut_last_contact == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_hour(ut_last_contact + 0.008333) as f64
-    };
-    let ut_last_contact_minutes = if ut_last_contact == -99.0 {
-        -99.0
-    } else {
-        pa_m::dh_min(ut_last_contact + 0.008333) as f64
-    };
-    let eclipse_magnitude = if magnitude == -99.0 {
-        -99.0
-    } else {
-        pa_u::round_f64(magnitude, 3)
-    };
+    let ut_first_contact_hour = pa_u::ternary_assign(
+        ut_first_contact == -99.0,
+        -99.0,
+        pa_m::dh_hour(ut_first_contact + 0.008333) as f64,
+    );
+    let ut_first_contact_minutes = pa_u::ternary_assign(
+        ut_first_contact == -99.0,
+        -99.0,
+        pa_m::dh_min(ut_first_contact + 0.008333) as f64,
+    );
+    let ut_mid_eclipse_hour = pa_u::ternary_assign(
+        ut_max_eclipse == -99.0,
+        -99.0,
+        pa_m::dh_hour(ut_max_eclipse + 0.008333) as f64,
+    );
+    let ut_mid_eclipse_minutes = pa_u::ternary_assign(
+        ut_max_eclipse == -99.0,
+        -99.0,
+        pa_m::dh_min(ut_max_eclipse + 0.008333) as f64,
+    );
+    let ut_last_contact_hour = pa_u::ternary_assign(
+        ut_last_contact == -99.0,
+        -99.0,
+        pa_m::dh_hour(ut_last_contact + 0.008333) as f64,
+    );
+    let ut_last_contact_minutes = pa_u::ternary_assign(
+        ut_last_contact == -99.0,
+        -99.0,
+        pa_m::dh_min(ut_last_contact + 0.008333) as f64,
+    );
+    let eclipse_magnitude =
+        pa_u::ternary_assign(magnitude == -99.0, -99.0, pa_u::round_f64(magnitude, 3));
 
     return (
         solar_eclipse_certain_date_day,

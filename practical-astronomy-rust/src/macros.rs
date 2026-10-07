@@ -13,11 +13,7 @@ pub fn hms_dh(hours: f64, minutes: f64, seconds: f64) -> f64 {
     let b = (f_minutes.abs() + a) / 60.0;
     let c = f_hours.abs() + b;
 
-    return if f_hours < 0.0 || f_minutes < 0.0 || f_seconds < 0.0 {
-        -c
-    } else {
-        c
-    };
+    return pa_u::ternary_assign(f_hours < 0.0 || f_minutes < 0.0 || f_seconds < 0.0, -c, c);
 }
 
 /// Return the hour part of a Decimal Hours.
@@ -28,13 +24,13 @@ pub fn dh_hour(decimal_hours: f64) -> u32 {
     let b = a * 3600.0;
     let c = pa_u::round_f64(b - 60.0 * (b / 60.0).floor(), 2);
     // let d = if c == 60.0 { 0.0 } else { c };
-    let e = if c == 60.0 { b + 60.0 } else { b };
+    let e = pa_u::ternary_assign(c == 60.0, b + 60.0, b);
 
-    return if decimal_hours < 0.0 {
-        -(e / 3600.0).floor() as u32
-    } else {
-        (e / 3600.0).floor() as u32
-    };
+    return pa_u::ternary_assign(
+        decimal_hours < 0.0,
+        -(e / 3600.0).floor() as u32,
+        (e / 3600.0).floor() as u32,
+    );
 }
 
 /// Return the minutes part of a Decimal Hours.
@@ -44,7 +40,7 @@ pub fn dh_min(decimal_hours: f64) -> u32 {
     let a = decimal_hours.abs();
     let b = a * 3600.0;
     let c = pa_u::round_f64(b - 60.0 * (b / 60.0).floor(), 2);
-    let e = if c == 60.0 { b + 60.0 } else { b };
+    let e = pa_u::ternary_assign(c == 60.0, b + 60.0, b);
 
     return ((e / 60.0).floor() % 60.0) as u32;
 }
@@ -56,7 +52,7 @@ pub fn dh_sec(decimal_hours: f64) -> f64 {
     let a = decimal_hours.abs();
     let b = a * 3600.0;
     let c = pa_u::round_f64(b - 60.0 * (b / 60.0).floor(), 2);
-    let d = if c == 60.0 { 0.0 } else { c };
+    let d = pa_u::ternary_assign(c == 60.0, 0.0, c);
 
     return d;
 }
@@ -69,12 +65,8 @@ pub fn cd_jd(day: f64, month: u32, year: u32) -> f64 {
     let f_month = month as f64;
     let f_year = year as f64;
 
-    let y = if f_month < 3.0 { f_year - 1.0 } else { f_year };
-    let m = if f_month < 3.0 {
-        f_month + 12.0
-    } else {
-        f_month
-    };
+    let y = pa_u::ternary_assign(f_month < 3.0, f_year - 1.0, f_year);
+    let m = pa_u::ternary_assign(f_month < 3.0, f_month + 12.0, f_month);
 
     let b: f64;
 
@@ -95,12 +87,7 @@ pub fn cd_jd(day: f64, month: u32, year: u32) -> f64 {
         }
     }
 
-    let c = if y < 0.0 {
-        ((365.25 * y) - 0.75).floor()
-    } else {
-        (365.25 * y).floor()
-    };
-
+    let c = pa_u::ternary_assign(y < 0.0, ((365.25 * y) - 0.75).floor(), (365.25 * y).floor());
     let d = (30.6001 * (m + 1.0)).floor();
 
     return b + c + d + f_day + 1720994.5;
@@ -113,11 +100,7 @@ pub fn jdc_day(julian_date: f64) -> f64 {
     let i = (julian_date + 0.5).floor();
     let f = julian_date + 0.5 - i;
     let a = ((i - 1867216.25) / 36524.25).floor();
-    let b = if i > 2299160.0 {
-        i + 1.0 + a - (a / 4.0).floor()
-    } else {
-        i
-    };
+    let b = pa_u::ternary_assign(i > 2299160.0, i + 1.0 + a - (a / 4.0).floor(), i);
     let c = b + 1524.0;
     let d = ((c - 122.1) / 365.25).floor();
     let e = (365.25 * d).floor();
@@ -133,19 +116,13 @@ pub fn jdc_month(julian_date: f64) -> u32 {
     let i = (julian_date + 0.5).floor();
     let _f = julian_date + 0.5 - i;
     let a = ((i - 1867216.25) / 36524.25).floor();
-    let b = if i > 2299160.0 {
-        i + 1.0 + a - (a / 4.0).floor()
-    } else {
-        i
-    };
+    let b = pa_u::ternary_assign(i > 2299160.0, i + 1.0 + a - (a / 4.0).floor(), i);
     let c = b + 1524.0;
     let d = ((c - 122.1) / 365.25).floor();
     let e = (365.25 * d).floor();
     let g = ((c - e) / 30.6001).floor();
 
-    let return_value = if g < 13.5 { g - 1.0 } else { g - 13.0 };
-
-    return return_value as u32;
+    return pa_u::ternary_assign(g < 13.5, g - 1.0, g - 13.0) as u32;
 }
 
 /// Returns the year part of a Julian Date.
@@ -155,20 +132,14 @@ pub fn jdc_year(julian_date: f64) -> u32 {
     let i = (julian_date + 0.5).floor();
     let _f = julian_date + 0.5 - i;
     let a = ((i - 1867216.25) / 36524.25).floor();
-    let b = if i > 2299160.0 {
-        i + 1.0 + a - (a / 4.0).floor()
-    } else {
-        i
-    };
+    let b = pa_u::ternary_assign(i > 2299160.0, i + 1.0 + a - (a / 4.0).floor(), i);
     let c = b + 1524.0;
     let d = ((c - 122.1) / 365.25).floor();
     let e = (365.25 * d).floor();
     let g = ((c - e) / 30.6001).floor();
-    let h = if g < 13.5 { g - 1.0 } else { g - 13.0 };
+    let h = pa_u::ternary_assign(g < 13.5, g - 1.0, g - 13.0);
 
-    let return_value = if h > 2.5 { d - 4716.0 } else { d - 4715.0 };
-
-    return return_value as u32;
+    return pa_u::ternary_assign(h > 2.5, d - 4716.0, d - 4715.0) as u32;
 }
 
 /// Convert a Julian Date to Day-of-Week (e.g., Sunday).
@@ -255,7 +226,7 @@ pub fn ra_ha(
     let g = hms_dh(ra_hours, ra_minutes, ra_seconds);
     let h = f - g;
 
-    return if h < 0.0 { 24.0 + h } else { h };
+    return pa_u::ternary_assign(h < 0.0, 24.0 + h, h);
 }
 
 /// Convert Hour Angle to Right Ascension.
@@ -320,7 +291,7 @@ pub fn ha_ra(
     let g = hms_dh(hour_angle_hours, hour_angle_minutes, hour_angle_seconds);
     let h = f - g;
 
-    return if h < 0.0 { 24.0 + h } else { h };
+    return pa_u::ternary_assign(h < 0.0, 24.0 + h, h);
 }
 
 /// Convert Local Civil Time to Universal Time.
@@ -601,11 +572,7 @@ pub fn dms_dd(degrees: f64, minutes: f64, seconds: f64) -> f64 {
     let b = (minutes.abs() + a) / 60.0;
     let c = degrees.abs() + b;
 
-    return if degrees < 0.0 || minutes < 0.0 || seconds < 0.0 {
-        -c
-    } else {
-        c
-    };
+    return pa_u::ternary_assign(degrees < 0.0 || minutes < 0.0 || seconds < 0.0, -c, c);
 }
 
 /// Convert W to Degrees.
@@ -622,14 +589,14 @@ pub fn dd_deg(decimal_degrees: f64) -> f64 {
     let a = decimal_degrees.abs();
     let b = a * 3600.0;
     let c = pa_u::round_f64(b - 60.0 * (b / 60.0).floor(), 2);
-    let _d = if c == 60.0 { 0.0 } else { c };
-    let e = if c == 60.0 { 60.0 } else { b };
+    let _d = pa_u::ternary_assign(c == 60.0, 0.0, c);
+    let e = pa_u::ternary_assign(c == 60.0, 60.0, b);
 
-    return if decimal_degrees < 0.0 {
-        -(e / 3600.0).floor()
-    } else {
-        (e / 3600.0).floor()
-    };
+    return pa_u::ternary_assign(
+        decimal_degrees < 0.0,
+        -(e / 3600.0).floor(),
+        (e / 3600.0).floor(),
+    );
 }
 
 /// Return Minutes part of Decimal Degrees.
@@ -639,8 +606,8 @@ pub fn dd_min(decimal_degrees: f64) -> f64 {
     let a = decimal_degrees.abs();
     let b = a * 3600.0;
     let c = pa_u::round_f64(b - 60.0 * (b / 60.0).floor(), 2);
-    let _d = if c == 60.0 { 0.0 } else { c };
-    let e = if c == 60.0 { b + 60.0 } else { b };
+    let _d = pa_u::ternary_assign(c == 60.0, 0.0, c);
+    let e = pa_u::ternary_assign(c == 60.0, b + 60.0, b);
 
     return (e / 60.0).floor() % 60.0;
 }
@@ -652,7 +619,7 @@ pub fn dd_sec(decimal_degrees: f64) -> f64 {
     let a = decimal_degrees.abs();
     let b = a * 3600.0;
     let c = pa_u::round_f64(b - 60.0 * (b / 60.0).floor(), 2);
-    let d = if c == 60.0 { 0.0 } else { c };
+    let d = pa_u::ternary_assign(c == 60.0, 0.0, c);
 
     return d;
 }
@@ -880,11 +847,11 @@ pub fn e_gst_ut(gsh: f64, gsm: f64, gss: f64, gd: f64, gm: u32, gy: u32) -> Stri
     let g = f - e;
     let h = g - (24.0 * (g / 24.0).floor());
 
-    if (h * 0.9972695663) < (4.0 / 60.0) {
-        return "Warning".to_string();
-    } else {
-        return "OK".to_string();
-    };
+    return pa_u::ternary_assign(
+        (h * 0.9972695663) < (4.0 / 60.0),
+        "Warning".to_string(),
+        "OK".to_string(),
+    );
 }
 
 /// Calculate Sun's ecliptic longitude.
@@ -997,11 +964,7 @@ pub fn eccentric_anomaly(am: f64, ec: f64) -> f64 {
 pub fn refract(y2: f64, sw: String, pr: f64, tr: f64) -> f64 {
     let y = y2.to_radians();
 
-    let d = if &sw[..1].to_string().to_lowercase() == "t" {
-        -1.0
-    } else {
-        1.0
-    };
+    let d = pa_u::ternary_assign(&sw[..1].to_string().to_lowercase() == "t", -1.0, 1.0);
 
     if d == -1.0 {
         let y3 = y;
@@ -1090,11 +1053,7 @@ pub fn parallax_ha(
     let y = (dms_dd(dd, dm, ds)).to_radians();
     let y1 = y;
 
-    let d = if &sw[..1].to_string().to_lowercase() == "t" {
-        1.0
-    } else {
-        -1.0
-    };
+    let d = pa_u::ternary_assign(&sw[..1].to_string().to_lowercase() == "t", 1.0, -1.0);
 
     if d == 1.0 {
         let (p, _q) = parallax_ha_l2870(x, y, rc, rp, rs, tp);
@@ -1184,11 +1143,7 @@ pub fn parallax_dec(
 
     let y = (dms_dd(dd, dm, ds)).to_radians();
     let y1 = y;
-    let d = if &sw[..1].to_string().to_lowercase() == "t" {
-        1.0
-    } else {
-        -1.0
-    };
+    let d = pa_u::ternary_assign(&sw[..1].to_string().to_lowercase() == "t", 1.0, -1.0);
 
     if d == 1.0 {
         let (_p, q) = parallax_dec_l2870(x, y, rc, rp, rs, tp);
@@ -1880,7 +1835,7 @@ pub fn rise_set_local_sidereal_time_rise(
     let d = (vd).to_radians();
     let e = (g).to_radians();
     let f = -((d).sin() + (e).sin() * (c).sin()) / ((e).cos() * (c).cos());
-    let h = if f.abs() < 1.0 { f.acos() } else { 0.0 };
+    let h = pa_u::ternary_assign(f.abs() < 1.0, f.acos(), 0.0);
     let i = dd_dh(degrees(b - h));
 
     return i - 24.0 * (i / 24.0).floor();
@@ -1905,11 +1860,11 @@ pub fn rise_set_azimuth_rise(
     let d = vd.to_radians();
     let e = g.to_radians();
     let f = (c.sin() + d.sin() * e.sin()) / (d.cos() * e.cos());
-    let h = if e_rs(rah, ram, ras, dd, dm, ds, vd, g) == "OK" {
-        f.acos()
-    } else {
-        0.0
-    };
+    let h = pa_u::ternary_assign(
+        e_rs(rah, ram, ras, dd, dm, ds, vd, g) == "OK",
+        f.acos(),
+        0.0,
+    );
     let i = degrees(h);
 
     return i - 360.0 * (i / 360.0).floor();
@@ -1934,7 +1889,7 @@ pub fn rise_set_local_sidereal_time_set(
     let d = vd.to_radians();
     let e = g.to_radians();
     let f = -(d.sin() + e.sin() * c.sin()) / (e.cos() * c.cos());
-    let h = if f.abs() < 1.0 { f.acos() } else { 0.0 };
+    let h = pa_u::ternary_assign(f.abs() < 1.0, f.acos(), 0.0);
     let i = dd_dh(degrees(b + h));
 
     return i - 24.0 * (i / 24.0).floor();
@@ -1959,11 +1914,11 @@ pub fn rise_set_azimuth_set(
     let d = vd.to_radians();
     let e = g.to_radians();
     let f = (c.sin() + d.sin() * e.sin()) / (d.cos() * e.cos());
-    let h = if e_rs(rah, ram, ras, dd, dm, ds, vd, g) == "OK" {
-        f.acos()
-    } else {
-        0.0
-    };
+    let h = pa_u::ternary_assign(
+        e_rs(rah, ram, ras, dd, dm, ds, vd, g) == "OK",
+        f.acos(),
+        0.0,
+    );
     let i = 360.0 - degrees(h);
 
     return i - 360.0 * (i / 360.0).floor();
@@ -2402,19 +2357,19 @@ pub fn angle(
         pa_t::AngleMeasure::Hours => "H",
     };
 
-    let a = if s_value == "H" {
-        dh_dd(hms_dh(xx1, xm1, xs1))
-    } else {
-        dms_dd(xx1, xm1, xs1)
-    };
+    let a = pa_u::ternary_assign(
+        s_value == "H",
+        dh_dd(hms_dh(xx1, xm1, xs1)),
+        dms_dd(xx1, xm1, xs1),
+    );
     let b = a.to_radians();
     let c = dms_dd(dd1, dm1, ds1);
     let d = c.to_radians();
-    let e = if s_value == "H" {
-        dh_dd(hms_dh(xx2, xm2, xs2))
-    } else {
-        dms_dd(xx2, xm2, xs2)
-    };
+    let e = pa_u::ternary_assign(
+        s_value == "H",
+        dh_dd(hms_dh(xx2, xm2, xs2)),
+        dms_dd(xx2, xm2, xs2),
+    );
     let f = e.to_radians();
     let g = dms_dd(dd2, dm2, ds2);
     let h = g.to_radians();
@@ -3084,15 +3039,12 @@ pub fn planet_coordinates(
     let l1 = (ll).sin();
     let l2 = (ll).cos();
 
-    // let mut ep = 0.0;
-    let ep: f64;
-    if ip < 3 {
-        ep = (-1.0 * rd * l1 / (re - rd * l2)).atan() + lg + std::f64::consts::PI;
-    } else {
-        ep = (re * l1 / (rd - re * l2)).atan() + pd
-    }
+    let ep: f64 = unwind(pa_u::ternary_assign(
+        ip < 3,
+        (-1.0 * rd * l1 / (re - rd * l2)).atan() + lg + std::f64::consts::PI,
+        (re * l1 / (rd - re * l2)).atan() + pd,
+    ));
 
-    let ep = unwind(ep);
     let bp = (rd * sp * (ep - pd).sin() / (ci * re * l1)).atan();
 
     let planet_longitude = degrees(unwind(ep));
@@ -3550,14 +3502,11 @@ pub fn p_comet_long_lat_dist(
         _li = rh * 0.005775518;
     }
 
-    let mut ep: f64;
-    if rd < re {
-        ep = ((-rd * s3) / (re - (rd * c3))).atan() + lg + 3.141592654;
-    } else {
-        ep = ((re * s3) / (rd - (re * c3))).atan() + lc;
-    }
-
-    ep = unwind(ep);
+    let ep: f64 = unwind(pa_u::ternary_assign(
+        rd < re,
+        ((-rd * s3) / (re - (rd * c3))).atan() + lg + std::f64::consts::PI,
+        ((re * s3) / (rd - (re * c3))).atan() + lc,
+    ));
     let tb = (rd * s2 * (ep - lc).sin()) / (c2 * re * s3);
     let bp = (tb).atan();
 
@@ -4081,7 +4030,7 @@ pub fn moon_rise_lct(dy: f64, mn: u32, yr: u32, ds: i32, zc: i32, g_long: f64, g
         x = lst_gst(la, 0.0, 0.0, g_long);
         ut = gst_ut(x, 0.0, 0.0, gdy, gmn, gyr);
 
-        g1 = if k == 1 { ut } else { gu };
+        g1 = pa_u::ternary_assign(k == 1, ut, gu);
 
         gu = ut;
         ut = gu;
@@ -4238,7 +4187,7 @@ pub fn e_moon_rise(dy: f64, mn: u32, yr: u32, ds: i32, zc: i32, g_long: f64, g_l
             s4 = ["GST conversion:", &s3].join(" ");
         }
 
-        g1 = if k == 1 { ut } else { gu };
+        g1 = pa_u::ternary_assign(k == 1, ut, gu);
 
         gu = ut;
         ut = gu;
@@ -4395,7 +4344,7 @@ pub fn moon_rise_lc_dmy(
         x = lst_gst(la, 0.0, 0.0, g_long);
         ut = gst_ut(x, 0.0, 0.0, gdy, gmn, gyr);
 
-        g1 = if k == 1 { ut } else { gu };
+        g1 = pa_u::ternary_assign(k == 1, ut, gu);
 
         gu = ut;
         ut = gu;
@@ -4558,7 +4507,7 @@ pub fn moon_rise_az(dy: f64, mn: u32, yr: u32, ds: i32, zc: i32, g_long: f64, g_
         x = lst_gst(la, 0.0, 0.0, g_long);
         ut = gst_ut(x, 0.0, 0.0, gdy, gmn, gyr);
 
-        g1 = if k == 1 { ut } else { gu };
+        g1 = pa_u::ternary_assign(k == 1, ut, gu);
 
         gu = ut;
         ut = gu;
@@ -4700,7 +4649,7 @@ pub fn moon_set_lct(dy: f64, mn: u32, yr: u32, ds: i32, zc: i32, g_long: f64, g_
         x = lst_gst(la, 0.0, 0.0, g_long);
         ut = gst_ut(x, 0.0, 0.0, gdy, gmn, gyr);
 
-        g1 = if k == 1 { ut } else { gu };
+        g1 = pa_u::ternary_assign(k == 1, ut, gu);
 
         gu = ut;
         ut = gu;
@@ -4857,7 +4806,7 @@ pub fn e_moon_set(dy: f64, mn: u32, yr: u32, ds: i32, zc: i32, g_long: f64, g_la
             s4 = ["GST conversion:", &s3].join(" ");
         }
 
-        g1 = if k == 1 { ut } else { gu };
+        g1 = pa_u::ternary_assign(k == 1, ut, gu);
 
         gu = ut;
         ut = gu;
@@ -5015,7 +4964,7 @@ pub fn moon_set_lc_dmy(
         x = lst_gst(la, 0.0, 0.0, g_long);
         ut = gst_ut(x, 0.0, 0.0, gdy, gmn, gyr);
 
-        g1 = if k == 1 { ut } else { gu };
+        g1 = pa_u::ternary_assign(k == 1, ut, gu);
 
         gu = ut;
         ut = gu;
@@ -5178,7 +5127,7 @@ pub fn moon_set_az(dy: f64, mn: u32, yr: u32, ds: i32, zc: i32, g_long: f64, g_l
         x = lst_gst(la, 0.0, 0.0, g_long);
         ut = gst_ut(x, 0.0, 0.0, gdy, gmn, gyr);
 
-        g1 = if k == 1 { ut } else { gu };
+        g1 = pa_u::ternary_assign(k == 1, ut, gu);
 
         gu = ut;
         ut = gu;

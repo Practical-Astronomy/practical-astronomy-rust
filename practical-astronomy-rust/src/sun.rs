@@ -31,7 +31,7 @@ pub fn approximate_position_of_sun(
     is_daylight_saving: bool,
     zone_correction: i32,
 ) -> (f64, f64, f64, f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let greenwich_date_day = pa_m::lct_gday(
         lct_hours,
@@ -157,7 +157,7 @@ pub fn precise_position_of_sun(
     is_daylight_saving: bool,
     zone_correction: i32,
 ) -> (f64, f64, f64, f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let g_day = pa_m::lct_gday(
         lct_hours,
@@ -267,7 +267,7 @@ pub fn sun_distance_and_angular_size(
     is_daylight_saving: bool,
     zone_correction: i32,
 ) -> (f64, f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let g_day = pa_m::lct_gday(
         lct_hours,
@@ -356,7 +356,7 @@ pub fn sunrise_and_sunset(
     geographical_long_deg: f64,
     geographical_lat_deg: f64,
 ) -> (f64, f64, f64, f64, f64, f64, String) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let local_sunrise_hours = pa_m::sunrise_lct(
         local_day,
@@ -409,36 +409,36 @@ pub fn sunrise_and_sunset(
         geographical_lat_deg,
     );
 
-    let local_sunrise_hour = if sun_rise_set_status == "OK" {
-        pa_m::dh_hour(adjusted_sunrise_hours) as f64
-    } else {
-        0.0
-    };
-    let local_sunrise_minute = if sun_rise_set_status == "OK" {
-        pa_m::dh_min(adjusted_sunrise_hours) as f64
-    } else {
-        0.0
-    };
-    let local_sunset_hour = if sun_rise_set_status == "OK" {
-        pa_m::dh_hour(adjusted_sunset_hours) as f64
-    } else {
-        0.0
-    };
-    let local_sunset_minute = if sun_rise_set_status == "OK" {
-        pa_m::dh_min(adjusted_sunset_hours) as f64
-    } else {
-        0.0
-    };
-    let azimuth_of_sunrise_deg = if sun_rise_set_status == "OK" {
-        pa_u::round_f64(azimuth_of_sunrise_deg1, 2)
-    } else {
-        0.0
-    };
-    let azimuth_of_sunset_deg = if sun_rise_set_status == "OK" {
-        pa_u::round_f64(azimuth_of_sunset_deg1, 2)
-    } else {
-        0.0
-    };
+    let local_sunrise_hour = pa_u::ternary_assign(
+        sun_rise_set_status == "OK",
+        pa_m::dh_hour(adjusted_sunrise_hours) as f64,
+        0.0,
+    );
+    let local_sunrise_minute = pa_u::ternary_assign(
+        sun_rise_set_status == "OK",
+        pa_m::dh_min(adjusted_sunrise_hours) as f64,
+        0.0,
+    );
+    let local_sunset_hour = pa_u::ternary_assign(
+        sun_rise_set_status == "OK",
+        pa_m::dh_hour(adjusted_sunset_hours) as f64,
+        0.0,
+    );
+    let local_sunset_minute = pa_u::ternary_assign(
+        sun_rise_set_status == "OK",
+        pa_m::dh_min(adjusted_sunset_hours) as f64,
+        0.0,
+    );
+    let azimuth_of_sunrise_deg = pa_u::ternary_assign(
+        sun_rise_set_status == "OK",
+        pa_u::round_f64(azimuth_of_sunrise_deg1, 2),
+        0.0,
+    );
+    let azimuth_of_sunset_deg = pa_u::ternary_assign(
+        sun_rise_set_status == "OK",
+        pa_u::round_f64(azimuth_of_sunset_deg1, 2),
+        0.0,
+    );
     let status = sun_rise_set_status.to_string();
 
     return (
@@ -480,7 +480,7 @@ pub fn morning_and_evening_twilight(
     geographical_lat_deg: f64,
     twilight_type: pa_t::TwilightType,
 ) -> (f64, f64, f64, f64, String) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let start_of_am_twilight_hours = pa_m::twilight_am_lct(
         local_day,
@@ -518,26 +518,26 @@ pub fn morning_and_evening_twilight(
     let adjusted_am_start_time = start_of_am_twilight_hours + 0.008333;
     let adjusted_pm_start_time = end_of_pm_twilight_hours + 0.008333;
 
-    let am_twilight_begins_hour = if twilight_status == "OK" {
-        pa_m::dh_hour(adjusted_am_start_time) as f64
-    } else {
-        -99.0
-    };
-    let am_twilight_begins_min = if twilight_status == "OK" {
-        pa_m::dh_min(adjusted_am_start_time) as f64
-    } else {
-        -99.0
-    };
-    let pm_twilight_ends_hour = if twilight_status == "OK" {
-        pa_m::dh_hour(adjusted_pm_start_time) as f64
-    } else {
-        -99.0
-    };
-    let pm_twilight_ends_min = if twilight_status == "OK" {
-        pa_m::dh_min(adjusted_pm_start_time) as f64
-    } else {
-        -99.0
-    };
+    let am_twilight_begins_hour = pa_u::ternary_assign(
+        twilight_status == "OK",
+        pa_m::dh_hour(adjusted_am_start_time) as f64,
+        -99.0,
+    );
+    let am_twilight_begins_min = pa_u::ternary_assign(
+        twilight_status == "OK",
+        pa_m::dh_min(adjusted_am_start_time) as f64,
+        -99.0,
+    );
+    let pm_twilight_ends_hour = pa_u::ternary_assign(
+        twilight_status == "OK",
+        pa_m::dh_hour(adjusted_pm_start_time) as f64,
+        -99.0,
+    );
+    let pm_twilight_ends_min = pa_u::ternary_assign(
+        twilight_status == "OK",
+        pa_m::dh_min(adjusted_pm_start_time) as f64,
+        -99.0,
+    );
     let status = twilight_status;
 
     return (

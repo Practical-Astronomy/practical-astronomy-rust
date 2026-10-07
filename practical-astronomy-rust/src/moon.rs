@@ -30,7 +30,7 @@ pub fn approximate_position_of_moon(
     local_date_month: u32,
     local_date_year: u32,
 ) -> (f64, f64, f64, f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let l0 = 91.9293359879052;
     let p0 = 130.143076320618;
@@ -190,7 +190,7 @@ pub fn precise_position_of_moon(
     local_date_month: u32,
     local_date_year: u32,
 ) -> (f64, f64, f64, f64, f64, f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let gdate_day = pa_m::lct_gday(
         lct_hour,
@@ -320,7 +320,7 @@ pub fn moon_phase(
     local_date_year: u32,
     accuracy_level: String,
 ) -> (f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let gdate_day = pa_m::lct_gday(
         lct_hour,
@@ -479,7 +479,7 @@ pub fn times_of_new_moon_and_full_moon(
     local_date_month: u32,
     local_date_year: u32,
 ) -> (f64, f64, f64, u32, u32, f64, f64, f64, u32, u32) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let jd_of_new_moon_days = pa_m::new_moon(
         daylight_saving,
@@ -637,7 +637,7 @@ pub fn moon_dist_ang_diam_hor_parallax(
     local_date_month: u32,
     local_date_year: u32,
 ) -> (f64, f64, f64, f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let moon_distance = pa_m::moon_dist(
         lct_hour,
@@ -721,7 +721,7 @@ pub fn moonrise_and_moonset(
     geog_long_deg: f64,
     geog_lat_deg: f64,
 ) -> (f64, f64, f64, u32, u32, f64, f64, f64, f64, u32, u32, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let local_time_of_moonrise_hours = pa_m::moon_rise_lct(
         local_date_day,
