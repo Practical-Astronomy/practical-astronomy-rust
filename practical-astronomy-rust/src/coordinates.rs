@@ -6,11 +6,7 @@ pub fn angle_to_decimal_degrees(degrees: f64, minutes: f64, seconds: f64) -> f64
     let a = seconds.abs() / 60.0;
     let b = (minutes.abs() + a) / 60.0;
     let c = degrees.abs() + b;
-    let d = if degrees < 0.0 || minutes < 0.0 || seconds < 0.0 {
-        -c
-    } else {
-        c
-    };
+    let d = pa_u::ternary_assign(degrees < 0.0 || minutes < 0.0 || seconds < 0.0, -c, c);
 
     return d;
 }
@@ -23,23 +19,16 @@ pub fn decimal_degrees_to_angle(decimal_degrees: f64) -> (f64, f64, f64) {
     let unsigned_decimal = decimal_degrees.abs();
     let total_seconds = unsigned_decimal * 3600.0;
     let seconds_2_dp = pa_u::round_f64(total_seconds % 60.0, 2);
-    let corrected_seconds = if seconds_2_dp == 60.0 {
-        0.0
-    } else {
-        seconds_2_dp
-    };
-    let corrected_remainder = if seconds_2_dp == 60.0 {
-        total_seconds + 60.0
-    } else {
-        total_seconds
-    };
+    let corrected_seconds = pa_u::ternary_assign(seconds_2_dp == 60.0, 0.0, seconds_2_dp);
+    let corrected_remainder =
+        pa_u::ternary_assign(seconds_2_dp == 60.0, total_seconds + 60.0, total_seconds);
     let minutes = (corrected_remainder / 60.0).floor() % 60.0;
     let unsigned_degrees = (corrected_remainder / 3600.0).floor();
-    let signed_degrees = if decimal_degrees < 0.0 {
-        -1.0 * unsigned_degrees
-    } else {
-        unsigned_degrees
-    };
+    let signed_degrees = pa_u::ternary_assign(
+        decimal_degrees < 0.0,
+        -1.0 * unsigned_degrees,
+        unsigned_degrees,
+    );
 
     return (signed_degrees, minutes, corrected_seconds.floor());
 }
@@ -59,7 +48,7 @@ pub fn right_ascension_to_hour_angle(
     local_year: u32,
     geographical_longitude: f64,
 ) -> (f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let hour_angle = pa_m::ra_ha(
         ra_hours,
@@ -102,7 +91,7 @@ pub fn hour_angle_to_right_ascension(
     local_year: u32,
     geographical_longitude: f64,
 ) -> (f64, f64, f64) {
-    let daylight_saving = if is_daylight_saving == true { 1 } else { 0 };
+    let daylight_saving = pa_u::bool_to_int(is_daylight_saving);
 
     let right_ascension = pa_m::ha_ra(
         hour_angle_hours,
@@ -445,29 +434,29 @@ pub fn angle_between_two_objects(
     dec_lat_2_sec: f64,
     hour_or_degree: String,
 ) -> (f64, f64, f64) {
-    let ra_long_1_decimal = if hour_or_degree == "H" {
-        pa_m::hms_dh(ra_long_1_hour_deg, ra_long_1_min, ra_long_1_sec)
-    } else {
-        pa_m::dms_dd(ra_long_1_hour_deg, ra_long_1_min, ra_long_1_sec)
-    };
-    let ra_long_1_deg = if hour_or_degree == "H" {
-        pa_m::dh_dd(ra_long_1_decimal)
-    } else {
-        ra_long_1_decimal
-    };
+    let ra_long_1_decimal = pa_u::ternary_assign(
+        hour_or_degree == "H",
+        pa_m::hms_dh(ra_long_1_hour_deg, ra_long_1_min, ra_long_1_sec),
+        pa_m::dms_dd(ra_long_1_hour_deg, ra_long_1_min, ra_long_1_sec),
+    );
+    let ra_long_1_deg = pa_u::ternary_assign(
+        hour_or_degree == "H",
+        pa_m::dh_dd(ra_long_1_decimal),
+        ra_long_1_decimal,
+    );
     let ra_long_1_rad = ra_long_1_deg.to_radians();
     let dec_lat_1_deg1 = pa_m::dms_dd(dec_lat_1_deg, dec_lat_1_min, dec_lat_1_sec);
     let dec_lat_1_rad = dec_lat_1_deg1.to_radians();
-    let ra_long_2_decimal = if hour_or_degree == "H" {
-        pa_m::hms_dh(ra_long_2_hour_deg, ra_long_2_min, ra_long_2_sec)
-    } else {
-        pa_m::dms_dd(ra_long_2_hour_deg, ra_long_2_min, ra_long_2_sec)
-    };
-    let ra_long_2_deg = if hour_or_degree == "H" {
-        pa_m::dh_dd(ra_long_2_decimal)
-    } else {
-        ra_long_2_decimal
-    };
+    let ra_long_2_decimal = pa_u::ternary_assign(
+        hour_or_degree == "H",
+        pa_m::hms_dh(ra_long_2_hour_deg, ra_long_2_min, ra_long_2_sec),
+        pa_m::dms_dd(ra_long_2_hour_deg, ra_long_2_min, ra_long_2_sec),
+    );
+    let ra_long_2_deg = pa_u::ternary_assign(
+        hour_or_degree == "H",
+        pa_m::dh_dd(ra_long_2_decimal),
+        ra_long_2_decimal,
+    );
     let ra_long_2_rad = ra_long_2_deg.to_radians();
     let dec_lat_2_deg1 = pa_m::dms_dd(dec_lat_2_deg, dec_lat_2_min, dec_lat_2_sec);
     let dec_lat_2_rad = dec_lat_2_deg1.to_radians();
@@ -565,36 +554,32 @@ pub fn rising_and_setting(
         rise_set_status = "circumpolar";
     }
 
-    let ut_rise_hour = if rise_set_status == "OK" {
-        pa_m::dh_hour(ut_rise_adjusted_hours) as f64
-    } else {
-        0.0
-    };
-    let ut_rise_min = if rise_set_status == "OK" {
-        pa_m::dh_min(ut_rise_adjusted_hours) as f64
-    } else {
-        0.0
-    };
-    let ut_set_hour = if rise_set_status == "OK" {
-        pa_m::dh_hour(ut_set_adjusted_hours) as f64
-    } else {
-        0.0
-    };
-    let ut_set_min = if rise_set_status == "OK" {
-        pa_m::dh_min(ut_set_adjusted_hours) as f64
-    } else {
-        0.0
-    };
-    let az_rise = if rise_set_status == "OK" {
-        pa_u::round_f64(az_rise_deg, 2)
-    } else {
-        0.0
-    };
-    let az_set = if rise_set_status == "OK" {
-        pa_u::round_f64(az_set_deg, 2)
-    } else {
-        0.0
-    };
+    let ut_rise_hour = pa_u::ternary_assign(
+        rise_set_status == "OK",
+        pa_m::dh_hour(ut_rise_adjusted_hours) as f64,
+        0.0,
+    );
+    let ut_rise_min = pa_u::ternary_assign(
+        rise_set_status == "OK",
+        pa_m::dh_min(ut_rise_adjusted_hours) as f64,
+        0.0,
+    );
+    let ut_set_hour = pa_u::ternary_assign(
+        rise_set_status == "OK",
+        pa_m::dh_hour(ut_set_adjusted_hours) as f64,
+        0.0,
+    );
+    let ut_set_min = pa_u::ternary_assign(
+        rise_set_status == "OK",
+        pa_m::dh_min(ut_set_adjusted_hours) as f64,
+        0.0,
+    );
+    let az_rise = pa_u::ternary_assign(
+        rise_set_status == "OK",
+        pa_u::round_f64(az_rise_deg, 2),
+        0.0,
+    );
+    let az_set = pa_u::ternary_assign(rise_set_status == "OK", pa_u::round_f64(az_set_deg, 2), 0.0);
 
     return (
         rise_set_status.to_string(),
@@ -1057,11 +1042,11 @@ pub fn selenographic_coordinates_1(
     let a_deg = pa_m::degrees(a_rad);
     let sub_earth_long_deg1 = a_deg - f2;
     let sub_earth_long_deg2 = sub_earth_long_deg1 - 360.0 * (sub_earth_long_deg1 / 360.0).floor();
-    let sub_earth_long_deg3 = if sub_earth_long_deg2 > 180.0 {
-        sub_earth_long_deg2 - 360.0
-    } else {
-        sub_earth_long_deg2
-    };
+    let sub_earth_long_deg3 = pa_u::ternary_assign(
+        sub_earth_long_deg2 > 180.0,
+        sub_earth_long_deg2 - 360.0,
+        sub_earth_long_deg2,
+    );
     let c1_rad = ((node_long_rad).cos() * (inclination_rad).sin()
         / ((geocentric_moon_lat_rad).cos() * (inclination_rad).cos()
             + (geocentric_moon_lat_rad).sin() * (inclination_rad).sin() * (node_long_rad).sin()))
@@ -1131,11 +1116,11 @@ pub fn selenographic_coordinates_2(
     let a_deg = pa_m::degrees(a_rad);
     let sub_solar_long_deg1 = a_deg - f2;
     let sub_solar_long_deg2 = sub_solar_long_deg1 - 360.0 * (sub_solar_long_deg1 / 360.0).floor();
-    let sub_solar_long_deg3 = if sub_solar_long_deg2 > 180.0 {
-        sub_solar_long_deg2 - 360.0
-    } else {
-        sub_solar_long_deg2
-    };
+    let sub_solar_long_deg3 = pa_u::ternary_assign(
+        sub_solar_long_deg2 > 180.0,
+        sub_solar_long_deg2 - 360.0,
+        sub_solar_long_deg2,
+    );
     let sub_solar_colong_deg = 90.0 - sub_solar_long_deg3;
 
     let sub_solar_longitude = pa_u::round_f64(sub_solar_long_deg3, 2);

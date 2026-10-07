@@ -46,19 +46,11 @@ pub fn get_date_of_easter(input_year: u32) -> (u32, u32, u32) {
 pub fn civil_date_to_day_number(mut month: u32, day: u32, year: u32) -> u32 {
     if month <= 2 {
         month = month - 1;
-        month = if pa_u::is_leap_year(year) {
-            month * 62
-        } else {
-            month * 63
-        };
+        month = pa_u::ternary_assign(pa_u::is_leap_year(year), month * 62, month * 63);
         month = (month as f64 / 2.0).floor() as u32;
     } else {
         month = ((month as f64 + 1.0) * 30.6).floor() as u32;
-        month = if pa_u::is_leap_year(year) {
-            month - 62
-        } else {
-            month - 63
-        };
+        month = pa_u::ternary_assign(pa_u::is_leap_year(year), month - 62, month - 63);
     }
 
     return month + day;
@@ -99,7 +91,7 @@ pub fn local_civil_time_to_universal_time(
 ) -> (u32, u32, u32, u32, u32, u32) {
     let lct = civil_time_to_decimal_hours(lct_hours, lct_minutes, lct_seconds);
 
-    let daylight_savings_offset = if is_daylight_savings == true { 1 } else { 0 };
+    let daylight_savings_offset = pa_u::bool_to_int(is_daylight_savings);
 
     let ut_interim = lct - daylight_savings_offset as f64 - zone_correction as f64;
     let gday_interim = local_day as f64 + (ut_interim / 24.0);
@@ -137,7 +129,7 @@ pub fn universal_time_to_local_civil_time(
     gw_month: u32,
     gw_year: u32,
 ) -> (u32, u32, u32, u32, u32, u32) {
-    let dst_value = if is_daylight_savings == true { 1 } else { 0 };
+    let dst_value = pa_u::bool_to_int(is_daylight_savings);
     let ut = pa_m::hms_dh(ut_hours, ut_minutes, ut_seconds);
     let zone_time = ut + zone_correction as f64;
     let local_time = zone_time + dst_value as f64;
@@ -215,7 +207,7 @@ pub fn greenwich_sidereal_time_to_universal_time(
     let ut_minutes = pa_m::dh_min(ut);
     let ut_seconds = pa_m::dh_sec(ut);
 
-    let warning_flag = if ut < 0.065574 { "Warning" } else { "OK" };
+    let warning_flag = pa_u::ternary_assign(ut < 0.065574, "Warning", "OK");
 
     return (ut_hours, ut_minutes, ut_seconds, warning_flag.to_string());
 }

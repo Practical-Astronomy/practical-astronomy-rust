@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"fn":["get_local_hour_from_ut","is_leap_year","round_f64"]};
+window.SIDEBAR_ITEMS = {"fn":["bool_to_int","get_local_hour_from_ut","is_leap_year","round_f64","ternary_assign"]};
